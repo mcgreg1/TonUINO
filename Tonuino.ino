@@ -17,10 +17,10 @@
     Information and contribution at https://tonuino.de.
 */
 
-// uncomment the below line to enable five button support
+// Entferne die // in der unteren Zeile, um die Unterstützung von fünf Knöpfen zu aktivieren
 //#define FIVEBUTTONS
 
-// uncomment the below line to enable volume control with a potentiometer
+// Entferne die // in der unteren Zeile, um die Lautstärkeregelung mit einem Potentiometer zu ermöglichen
 //#define POTI
 static const uint32_t cardCookie = 322417479;
 
@@ -39,7 +39,7 @@ struct folderSettings {
   uint8_t special2;
 };
 
-// this object stores nfc tag data
+// Dieses Objekt speichert NFC-Tag Daten
 struct nfcTagObject {
   uint32_t cookie;
   uint8_t version;
@@ -50,7 +50,7 @@ struct nfcTagObject {
   //  uint8_t special2;
 };
 
-// admin settings stored in eeprom
+// Admin-Einstellungen im EEPROM gespeichert
 struct adminSettings {
   uint32_t cookie;
   byte version;
@@ -68,17 +68,17 @@ struct adminSettings {
 };
 
 
-//StopWhenCardAway settings
+// StopWhenCardAway Einstellungen
 static bool hasCard = false;
 static byte lastCardUid[4];
 static byte retries;
 static bool lastCardWasUL;
 static bool forgetLastCard=false;
 
-const byte PCS_NO_CHANGE     = 0; // no change detected since last pollCard() call
-const byte PCS_NEW_CARD      = 1; // card with new UID detected (had no card or other card before)
-const byte PCS_CARD_GONE     = 2; // card is not reachable anymore
-const byte PCS_CARD_IS_BACK  = 3; // card was gone, and is now back again
+const byte PCS_NO_CHANGE     = 0; // Keine Änderung seit dem letzten pollCard()-Aufruf festgestellt
+const byte PCS_NEW_CARD      = 1; // Karte mit neuer UID erkannt (hatte vorher keine Karte oder andere Karte)
+const byte PCS_CARD_GONE     = 2; // Karte ist nicht mehr erreichbar
+const byte PCS_CARD_IS_BACK  = 3; // Karte war weg und ist jetzt wieder da.
 
 adminSettings mySettings;
 nfcTagObject myCard;
@@ -106,13 +106,13 @@ void dump_byte_array(byte * buffer, byte bufferSize);
 void adminMenu(bool fromCard = false);
 bool knownCard = false;
 
-// implement a notification class,
-// its member methods will get called
-//
+// Eine Benachrichtigungsklasse implementieren,
+// seine Mitgliedsmethoden werden aufgerufen
+
 class Mp3Notify {
   public:
     static void OnError(uint16_t errorCode) {
-      // see DfMp3_Error for code meaning
+      // Siehe DfMp3_Error für die Code-Bedeutung
       Serial.println();
       Serial.print("Com Error ");
       Serial.println(errorCode);
@@ -508,10 +508,10 @@ class RepeatSingleModifier: public Modifier {
     }
 };
 
-// An modifier can also do somethings in addition to the modified action
-// by returning false (not handled) at the end
-// This simple FeedbackModifier will tell the volume before changing it and
-// give some feedback once a RFID card is detected.
+// Ein Modifikator kann auch etwas zusätzlich zur modifizierten Aktion tun
+// durch Rückgabe von Falsch (nicht behandelt) am Ende
+// Dieser einfache FeedbackModifier teilt die Lautstärke vor der Änderung mit und
+// wird eine Rückmeldung geben, sobald eine RFID-Karte erkannt wird.
 class FeedbackModifier: public Modifier {
   public:
     virtual bool handleVolumeDown() {
@@ -566,7 +566,7 @@ static void nextTrack(uint16_t track) {
   if (myFolder->mode == 1 || myFolder->mode == 7) {
     Serial.println(F("Hörspielmodus ist aktiv -> keinen neuen Track spielen"));
     setstandbyTimer();
-    //    mp3.sleep(); // Je nach Modul kommt es nicht mehr zurück aus dem Sleep!
+    //    mp3.sleep(); // Je nach Modul kommt es nicht mehr zurück aus dem Schlaf!
   
    
   }
@@ -577,7 +577,7 @@ static void nextTrack(uint16_t track) {
       Serial.print(F("Albummodus ist aktiv -> nächster Track: "));
       Serial.print(currentTrack);
     } else
-      //      mp3.sleep();   // Je nach Modul kommt es nicht mehr zurück aus dem Sleep!
+      //      mp3.sleep();   // Je nach Modul kommt es nicht mehr zurück aus dem Schlaf!
       setstandbyTimer();
     { }
   }
@@ -588,7 +588,7 @@ static void nextTrack(uint16_t track) {
     } else {
       Serial.println(F("Ende der Queue -> beginne von vorne"));
       currentTrack = 1;
-      //// Wenn am Ende der Queue neu gemischt werden soll bitte die Zeilen wieder aktivieren
+      // Wenn am Ende der Queue neu gemischt werden soll bitte die Zeilen wieder aktivieren
       //     Serial.println(F("Ende der Queue -> mische neu"));
       //     shuffleQueue();
     }
@@ -598,7 +598,7 @@ static void nextTrack(uint16_t track) {
 
   if (myFolder->mode == 4) {
     Serial.println(F("Einzel Modus aktiv -> Strom sparen"));
-    //    mp3.sleep();      // Je nach Modul kommt es nicht mehr zurück aus dem Sleep!
+    //    mp3.sleep();      // Je nach Modul kommt es nicht mehr zurück aus dem Schlaf!
     setstandbyTimer();
   }
   if (myFolder->mode == 5) {
@@ -611,7 +611,7 @@ static void nextTrack(uint16_t track) {
       // Fortschritt im EEPROM abspeichern
       EEPROM.update(myFolder->folder, currentTrack);
     } else {
-      //      mp3.sleep();  // Je nach Modul kommt es nicht mehr zurück aus dem Sleep!
+      //      mp3.sleep();  // Je nach Modul kommt es nicht mehr zurück aus dem Schlaf!
       // Fortschritt zurück setzen
       EEPROM.update(myFolder->folder, 1);
       setstandbyTimer();
@@ -664,9 +664,9 @@ static void previousTrack() {
 }
 
 // MFRC522
-#define RST_PIN 9                 // Configurable, see typical pin layout above
-#define SS_PIN 10                 // Configurable, see typical pin layout above
-MFRC522 mfrc522(SS_PIN, RST_PIN); // Create MFRC522
+#define RST_PIN 9                 // Konfigurierbar, siehe typisches PIN-Layout oben
+#define SS_PIN 10                 // Konfigurierbar, siehe typisches PIN-Layout oben
+MFRC522 mfrc522(SS_PIN, RST_PIN); // Erstelle MFRC522
 MFRC522::MIFARE_Key key;
 bool successRead;
 byte sector = 1;
@@ -727,13 +727,13 @@ void checkStandbyAtMillis() {
     delay(500);
 
     // http://discourse.voss.earth/t/intenso-s10000-powerbank-automatische-abschaltung-software-only/805
-    // powerdown to 27mA (powerbank switches off after 30-60s)
+    // Abschaltung auf 27mA (Die Stromversorgung schaltet sich nach 30-60s ab)
     mfrc522.PCD_AntennaOff();
     mfrc522.PCD_SoftPowerDown();
     mp3.sleep();
 
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-    cli();  // Disable interrupts
+    cli();  // Unterbrechungen sperren
     sleep_mode();
   }
 }
@@ -776,13 +776,13 @@ void setup() {
   Serial.println(F("created by Thorsten Voß and licensed under GNU/GPL."));
   Serial.println(F("Information and contribution at https://tonuino.de.\n"));
 
-  // Busy Pin
+  // Busy PIN
   pinMode(busyPin, INPUT);
 
-  // load Settings from EEPROM
+  // Lade Einstellungen von der EEPROM
   loadSettingsFromFlash();
 
-  // activate standby timer
+  // Aktiviere Standby-Timer
   setstandbyTimer();
 
   // DFPlayer Mini initialisieren
@@ -828,7 +828,7 @@ void setup() {
   digitalWrite(shutdownPin, LOW);
 
 
-  // RESET --- ALLE DREI KNÖPFE BEIM STARTEN GEDRÜCKT HALTEN -> alle EINSTELLUNGEN werden gelöscht
+  // RESET --- Alle drei Knöpfe beim Starten gedrückt halten, um alle Einstellungen zu löschen
   if (digitalRead(buttonPause) == LOW && digitalRead(buttonUp) == LOW &&
       digitalRead(buttonDown) == LOW) {
     Serial.println(F("Reset -> EEPROM wird gelöscht"));
@@ -839,7 +839,7 @@ void setup() {
   }
 
 
-  // Start Shortcut "at Startup" - e.g. Welcome Sound
+  // Startverknüpfung "Beim Start" - z.B. Willkommens-Ton
   playShortCut(3);
 }
 
@@ -1022,7 +1022,7 @@ void playShortCut(uint8_t shortCut) {
     Serial.println(F("Shortcut not configured!"));
 }
 
-//Um festzustellen ob eine Karte entfernt wurde, muss der MFRC regelmäßig ausgelesen werden
+// Um festzustellen ob eine Karte entfernt wurde, muss der MFRC regelmäßig ausgelesen werden
 byte pollCard()
 {
   const byte maxRetries = 2;
@@ -1063,7 +1063,7 @@ byte pollCard()
   }
   else // hasCard
   {
-    // perform a dummy read command just to see whether the card is in range
+    // Einen Dummy-Lesebefehl ausführen, um zu sehen ob die Karte in Reichweite ist
     byte buffer[18];
     byte size = sizeof(buffer);
     
@@ -1093,7 +1093,7 @@ byte pollCard()
 
 void handleCardReader()
 {
-  // poll card only every 100ms
+  // Überprüfe Karte nur jede 100ms
   static uint8_t lastCardPoll = 0;
   uint8_t now = millis();
   
@@ -1115,7 +1115,7 @@ void handleCardReader()
     case PCS_CARD_IS_BACK:
     if (mySettings.stopWhenCardAway) 
     {
-      //nur weiterspielen wenn vorher nicht konfiguriert wurde
+      // Nur Weiterspielen wenn vorher nicht Konfiguriert wurde
       if (!forgetLastCard) 
       {
           mp3.start();
@@ -1147,8 +1147,7 @@ void loop() {
 
     }
 
-    // Buttons werden nun über JS_Button gehandelt, dadurch kann jede Taste
-    // doppelt belegt werden
+    // Buttons werden nun über JS_Button gehandelt, dadurch kann jede Taste doppelt belegt werden
     readButtons();
 
     // admin menu
@@ -1189,7 +1188,8 @@ void loop() {
         else {
           advertTrack = currentTrack;
         }
-        // Spezialmodus Von-Bis für Album und Party gibt die Dateinummer relativ zur Startposition wieder
+        // Spezialmodus Von-Bis
+		// Für Album und Party gibt die Dateinummer relativ zur Startposition wieder
         if (myFolder->mode == 8 || myFolder->mode == 9) {
           advertTrack = advertTrack - myFolder->special + 1;
         }
@@ -1291,7 +1291,7 @@ void loop() {
 void onNewCard()
 {
    forgetLastCard=false;
-  // make random a little bit more "random"
+  // Den Zufall ein wenig mehr "Zufällig" machen
   randomSeed(millis() + random(1000));
     if (myCard.cookie == cardCookie && myCard.nfcFolderSettings.folder != 0 && myCard.nfcFolderSettings.mode != 0) {
       playFolder();
@@ -1307,18 +1307,18 @@ void onNewCard()
 }
 
 void adminMenu(bool fromCard = false) {
-  //Vergesse die vorherige Karte, wenn das Admin Menü betreten wird
+  // Vergesse die vorherige Karte, wenn das Admin-Menü betreten wird
   forgetLastCard=true;
   disablestandbyTimer();
   mp3.pause();
   Serial.println(F("=== adminMenu()"));
   knownCard = false;
   if (fromCard == false) {
-    // Admin menu has been locked - it still can be trigged via admin card
+    // Das Admin-Menü wurde gesperrt - Es kann weiterhin über die Admin-Karte betreten werden.
     if (mySettings.adminMenuLocked == 1) {
       return;
     }
-    // Pin check
+    // PIN Prüfung
     else if (mySettings.adminMenuLocked == 2) {
       uint8_t pin[4];
       mp3.playMp3FolderTrack(991);
@@ -1330,7 +1330,7 @@ void adminMenu(bool fromCard = false) {
         return;
       }
     }
-    // Match check
+    // Treffer überprüfen
     else if (mySettings.adminMenuLocked == 3) {
       uint8_t a = random(10, 20);
       uint8_t b = random(1, 10);
@@ -1369,11 +1369,11 @@ void adminMenu(bool fromCard = false) {
     mfrc522.PCD_StopCrypto1();
   }
   else if (subMenu == 2) {
-    // Maximum Volume
+    // Maximale Lautstärke
     mySettings.maxVolume = voiceMenu(30 - mySettings.minVolume, 930, mySettings.minVolume, false, false, mySettings.maxVolume - mySettings.minVolume) + mySettings.minVolume;
   }
   else if (subMenu == 3) {
-    // Minimum Volume
+    // Minimale Lautstärke
     mySettings.minVolume = voiceMenu(mySettings.maxVolume - 1, 931, 0, false, false, mySettings.minVolume);
   }
   else if (subMenu == 4) {
@@ -1381,12 +1381,12 @@ void adminMenu(bool fromCard = false) {
     mySettings.initVolume = voiceMenu(mySettings.maxVolume - mySettings.minVolume + 1, 932, mySettings.minVolume - 1, false, false, mySettings.initVolume - mySettings.minVolume + 1) + mySettings.minVolume - 1;
   }
   else if (subMenu == 5) {
-    // EQ
+    // Equalizer
     mySettings.eq = voiceMenu(6, 920, 920, false, false, mySettings.eq);
     mp3.setEq(mySettings.eq - 1);
   }
   else if (subMenu == 6) {
-    // create modifier card
+    // Erstelle Modifier Karte
     nfcTagObject tempCard;
     tempCard.cookie = cardCookie;
     tempCard.version = 1;
@@ -1440,7 +1440,7 @@ void adminMenu(bool fromCard = false) {
     }
   }
   else if (subMenu == 9) {
-    // Create Cards for Folder
+    // Erstelle Karten für Ordner
     // Ordner abfragen
     nfcTagObject tempCard;
     tempCard.cookie = cardCookie;
@@ -1480,7 +1480,7 @@ void adminMenu(bool fromCard = false) {
     }
   }
   else if (subMenu == 10) {
-    // Invert Functions for Up/Down Buttons
+    // Umkehrfunktionen für Auf-/Ab-Tasten
     int temp = voiceMenu(2, 933, 933, false);
     if (temp == 2) {
       mySettings.invertVolumeButtons = true;
@@ -1497,7 +1497,7 @@ void adminMenu(bool fromCard = false) {
     resetSettings();
     mp3.playMp3FolderTrack(999);
   }
-  // lock admin menu
+  // Sperre Admin-Menü
   else if (subMenu == 12) {
     int temp = voiceMenu(4, 980, 980, false);
     if (temp == 1) {
@@ -1519,7 +1519,7 @@ void adminMenu(bool fromCard = false) {
     }
 
   }
-  //Wiedergabe stoppen wenn Karte entfernt wird
+  // Wiedergabe stoppen wenn Karte entfernt wird
   else if (subMenu == 13) {
     int temp = voiceMenu(2, 937, 937, false);
     if (temp == 2) {
@@ -1710,7 +1710,7 @@ void setupCard() {
   nfcTagObject newCard;
   if (setupFolder(&newCard.nfcFolderSettings) == true)
   {
-    // Karte ist konfiguriert -> speichern
+    // Karte ist Konfiguriert und wird gespeichert
     mp3.pause();
     do {
     } while (isPlaying());
@@ -1721,7 +1721,7 @@ void setupCard() {
 }
 bool readCard(nfcTagObject * nfcTag) {
   nfcTagObject tempCard;
-  // Show some details of the PICC (that is: the tag/card)
+  // Zeigt einige Details des PICC (Das ist: Der/Die Tag/Karte)
   Serial.print(F("Card UID:"));
   dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
   Serial.println();
@@ -1732,7 +1732,7 @@ bool readCard(nfcTagObject * nfcTag) {
   byte buffer[18];
   byte size = sizeof(buffer);
 
-  // Authenticate using key A
+  // Authentifiziere mit Key A
   if ((piccType == MFRC522::PICC_TYPE_MIFARE_MINI ) ||
       (piccType == MFRC522::PICC_TYPE_MIFARE_1K ) ||
       (piccType == MFRC522::PICC_TYPE_MIFARE_4K ) )
@@ -1743,9 +1743,9 @@ bool readCard(nfcTagObject * nfcTag) {
   }
   else if (piccType == MFRC522::PICC_TYPE_MIFARE_UL )
   {
-    byte pACK[] = {0, 0}; //16 bit PassWord ACK returned by the tempCard
+    byte pACK[] = {0, 0}; // 16 Bit ACK Passwort von der tempCard zurückgegeben
 
-    // Authenticate using key A
+  // Authentifiziere mit Key A
     Serial.println(F("Authenticating MIFARE UL..."));
     status = mfrc522.PCD_NTAG216_AUTH(key.keyByte, pACK);
   }
@@ -1756,12 +1756,12 @@ bool readCard(nfcTagObject * nfcTag) {
     return false;
   }
 
-  // Show the whole sector as it currently is
+  // Zeige den gesamten Sektor, wie er derzeit ist
   // Serial.println(F("Current data in sector:"));
   // mfrc522.PICC_DumpMifareClassicSectorToSerial(&(mfrc522.uid), &key, sector);
   // Serial.println();
 
-  // Read data from the block
+  // Daten aus dem Block lesen
   if ((piccType == MFRC522::PICC_TYPE_MIFARE_MINI ) ||
       (piccType == MFRC522::PICC_TYPE_MIFARE_1K ) ||
       (piccType == MFRC522::PICC_TYPE_MIFARE_4K ) )
@@ -1908,12 +1908,12 @@ bool readCard(nfcTagObject * nfcTag) {
 
 void writeCard(nfcTagObject nfcTag) {
   MFRC522::PICC_Type mifareType;
-  byte buffer[16] = {0x13, 0x37, 0xb3, 0x47, // 0x1337 0xb347 magic cookie to
-                     // identify our nfc tags
-                     0x02,                   // version 1
-                     nfcTag.nfcFolderSettings.folder,          // the folder picked by the user
-                     nfcTag.nfcFolderSettings.mode,    // the playback mode picked by the user
-                     nfcTag.nfcFolderSettings.special, // track or function for admin cards
+  byte buffer[16] = {0x13, 0x37, 0xb3, 0x47, // 0x1337 0xb347 Magischer Cookie zu
+                     // Identifizieren unsere NFC-Tags
+                     0x02,                   // Version 1
+                     nfcTag.nfcFolderSettings.folder,          // Der vom Benutzer ausgewählte Ordner
+                     nfcTag.nfcFolderSettings.mode,    // Der vom Benutzer gewählte Wiedergabemodus
+                     nfcTag.nfcFolderSettings.special, // Titel oder Funktion für Verwaltungskarten
                      nfcTag.nfcFolderSettings.special2,
                      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
                     };
@@ -1922,8 +1922,8 @@ void writeCard(nfcTagObject nfcTag) {
 
   mifareType = mfrc522.PICC_GetType(mfrc522.uid.sak);
 
-  // Authenticate using key B
-  //authentificate with the card and set card specific parameters
+  // Authentifiziere mit Key B
+  // Mit der Karte Authentifizieren und Kartenspezifische Parameter einstellen
   if ((mifareType == MFRC522::PICC_TYPE_MIFARE_MINI ) ||
       (mifareType == MFRC522::PICC_TYPE_MIFARE_1K ) ||
       (mifareType == MFRC522::PICC_TYPE_MIFARE_4K ) )
@@ -1934,9 +1934,9 @@ void writeCard(nfcTagObject nfcTag) {
   }
   else if (mifareType == MFRC522::PICC_TYPE_MIFARE_UL )
   {
-    byte pACK[] = {0, 0}; //16 bit PassWord ACK returned by the NFCtag
+    byte pACK[] = {0, 0}; // 16 Bit ACK Passwort, das vom NFC-Tag zurückgegeben wird
 
-    // Authenticate using key A
+    // Authentifiziere mit Key A
     Serial.println(F("Authenticating UL..."));
     status = mfrc522.PCD_NTAG216_AUTH(key.keyByte, pACK);
   }
@@ -1948,7 +1948,7 @@ void writeCard(nfcTagObject nfcTag) {
     return;
   }
 
-  // Write data to the block
+  // Daten in den Block schreiben
   Serial.print(F("Writing data into block "));
   Serial.print(blockAddr);
   Serial.println(F(" ..."));
@@ -2006,10 +2006,10 @@ void dump_byte_array(byte * buffer, byte bufferSize) {
   }
 }
 
-///////////////////////////////////////// Check Bytes   ///////////////////////////////////
+///////////////////////////////////////// Prüfe Bytes ///////////////////////////////////
 bool checkTwo ( uint8_t a[], uint8_t b[] ) {
-  for ( uint8_t k = 0; k < 4; k++ ) {   // Loop 4 times
-    if ( a[k] != b[k] ) {     // IF a != b then false, because: one fails, all fail
+  for ( uint8_t k = 0; k < 4; k++ ) {   // Wiederhole 4 Mal
+    if ( a[k] != b[k] ) {     // Wenn a != b dann falsch, denn: Wenn einer versagt, versagen alle
       return false;
     }
   }
