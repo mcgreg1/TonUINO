@@ -5,7 +5,6 @@
 #include "TonUINO.h"
 #include <MFRC522.h>
 
-
 // MFRC522
 #define RST_PIN 9                 // Configurable, see typical pin layout above
 #define SS_PIN 10                 // Configurable, see typical pin layout above
@@ -13,10 +12,7 @@
 extern MFRC522 mfrc522;//(SS_PIN, RST_PIN); // Create MFRC522
 extern uint32_t cardCookie;
 
-
-
 static MFRC522::StatusCode status;
-
 
 void initNFC();
 
@@ -38,7 +34,6 @@ void writeCard(nfcTagObject nfcTag);
 void resetCard();
 void handleCardReader();
 byte pollCard();
-
 void onNewCard();
 
 #endif 

@@ -6,7 +6,7 @@
 #include "player.h"
 #include "utilities.h"
 
-#include <DFMiniMp3.h>
+
 #include <EEPROM.h>
 #include <JC_Button.h>
 

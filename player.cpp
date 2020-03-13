@@ -25,30 +25,28 @@
       Serial.print("Com Error ");
       Serial.println(errorCode);
     }
-    static void Mp3Notify::OnPlayFinished(uint16_t track) {
+    static void Mp3Notify::PrintlnSourceAction(DfMp3_PlaySources source, const char* action) {
+      if (source & DfMp3_PlaySources_Sd) Serial.print("SD Karte ");
+      if (source & DfMp3_PlaySources_Usb) Serial.print("USB ");
+      if (source & DfMp3_PlaySources_Flash) Serial.print("Flash ");
+      Serial.println(action);
+    }
+    static void Mp3Notify::OnPlayFinished(DfMp3_PlaySources source, uint16_t track) {
       //      Serial.print("Track beendet");
       //      Serial.println(track);
       //      delay(100);
       nextTrack(track);
     }
-    static void Mp3Notify::OnCardOnline(uint16_t code) {
-      Serial.println(F("SD Karte online "));
+    static void Mp3Notify::OnPlaySourceOnline(DfMp3_PlaySources source) {
+      PrintlnSourceAction(source, "online");
     }
-    static void Mp3Notify::OnCardInserted(uint16_t code) {
-      Serial.println(F("SD Karte bereit "));
+    static void Mp3Notify::OnPlaySourceInserted(DfMp3_PlaySources source) {
+      PrintlnSourceAction(source, "bereit");
     }
-    static void Mp3Notify::OnCardRemoved(uint16_t code) {
-      Serial.println(F("SD Karte entfernt "));
+    static void Mp3Notify::OnPlaySourceRemoved(DfMp3_PlaySources source) {
+      PrintlnSourceAction(source, "entfernt");
     }
-    static void Mp3Notify::OnUsbOnline(uint16_t code) {
-      Serial.println(F("USB online "));
-    }
-    static void Mp3Notify::OnUsbInserted(uint16_t code) {
-      Serial.println(F("USB bereit "));
-    }
-    static void Mp3Notify::OnUsbRemoved(uint16_t code) {
-      Serial.println(F("USB entfernt "));
-    }
+
 
 
 // Leider kann das Modul selbst keine Queue abspielen, daher müssen wir selbst die Queue verwalten
