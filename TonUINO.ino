@@ -12,11 +12,11 @@
 */
 
 // uncomment the below line to enable volume control with a potentiometer
-//#define POTI
+#define POTI
 
 
 // DFPlayer Mini
-SoftwareSerial mySoftwareSerial(2, 3); // RX, TX
+//SoftwareSerial mySoftwareSerial(2, 3); // RX, TX
 
 adminSettings mySettings;
 nfcTagObject myCard;
@@ -41,6 +41,7 @@ bool ignorePauseButton = false;
 bool ignoreUpButton = false;
 bool ignoreDownButton = false;
 
+
 void setup() {
 
   Serial.begin(115200); // Es gibt ein paar Debug Ausgaben über die serielle Schnittstelle
@@ -49,8 +50,8 @@ void setup() {
   // Dieser Hinweis darf nicht entfernt werden
   printLogo();
   initPins();
-  initPlayer();
-
+  mp3.init();
+  
   // load Settings from EEPROM
   loadSettingsFromFlash();
 
@@ -108,7 +109,9 @@ void initPins()
     #ifdef POTI
   potiValueRaw = analogRead(POTIPIN);
   volume = map(potiValueRaw, 0,1024,mySettings.minVolume, mySettings.maxVolume+1);
-  Serial.print(F("Poti Bereich: ")); Serial.print(mySettings.minVolume); Serial.print(" - "); Serial.println(mySettings.maxVolume+1);
+  Serial.print(F("Poti Bereich: ")); 
+  Serial.print(mySettings.minVolume); Serial.print(" - ");
+  Serial.println(mySettings.maxVolume+1);
   Serial.println(F("Initiale Lautstärke über Poti:"));
   Serial.println(volume);
   #endif
@@ -173,7 +176,7 @@ void nextButton()
     if (activeModifier->handleNextButton() == true)
       return;
 
-  nextTrack(random(65536));
+  mp3.nextTrack();
   delay(1000);
 }
 
@@ -183,7 +186,7 @@ void previousButton()
     if (activeModifier->handlePreviousButton() == true)
       return;
 
-  previousTrack();
+  mp3.previousTrack();
   delay(1000);
 }
 
@@ -336,47 +339,6 @@ void adminMenu(bool fromCard = false)
     if (mySettings.adminMenuLocked == 1) {
       return;
     }
-    // Pin check
-    else if (mySettings.adminMenuLocked == 2) {
-      uint8_t pin[4];
-      mp3.playMp3FolderTrack(991);
-      if (askCode(pin) == true) {
-        if (checkTwo(pin, mySettings.adminMenuPin) == false) {
-          return;
-        }
-      } else {
-        return;
-      }
-    }
-    // Match check
-    else if (mySettings.adminMenuLocked == 3) {
-      uint8_t a = random(10, 20);
-      uint8_t b = random(1, 10);
-      uint8_t c;
-      mp3.playMp3FolderTrack(992);
-      waitForTrackToFinish();
-      mp3.playMp3FolderTrack(a);
-
-      if (random(1, 3) == 2) {
-        // a + b
-        c = a + b;
-        waitForTrackToFinish();
-        mp3.playMp3FolderTrack(993);
-      } else {
-        // a - b
-        b = random(1, a);
-        c = a - b;
-        waitForTrackToFinish();
-        mp3.playMp3FolderTrack(994);
-      }
-      waitForTrackToFinish();
-      mp3.playMp3FolderTrack(b);
-      Serial.println(c);
-      uint8_t temp = voiceMenu(255, 0, 0, false);
-      if (temp != c) {
-        return;
-      }
-    }
   }
   int subMenu = voiceMenu(13, 900, 900, false, false, 0, true);
   if (subMenu == 0)
@@ -401,7 +363,7 @@ void adminMenu(bool fromCard = false)
   else if (subMenu == 5) {
     // EQ
     mySettings.eq = voiceMenu(6, 920, 920, false, false, mySettings.eq);
-    mp3.setEq(mySettings.eq - 1);
+    //mp3.setEq(mySettings.eq - 1);//TODO: REMOVE/REPLACE
   }
   else if (subMenu == 6) {
     // create modifier card
@@ -508,7 +470,9 @@ void adminMenu(bool fromCard = false)
     }
   }
   else if (subMenu == 11) {
+    #ifdef DEBUG
     Serial.println(F("Reset -> EEPROM wird gelöscht"));
+    #endif
     for (int i = 0; i < EEPROM.length(); i++) {
       EEPROM.update(i, 0);
     }
@@ -521,20 +485,10 @@ void adminMenu(bool fromCard = false)
     if (temp == 1) {
       mySettings.adminMenuLocked = 0;
     }
-    else if (temp == 2) {
+    else  {
       mySettings.adminMenuLocked = 1;
     }
-    else if (temp == 3) {
-      int8_t pin[4];
-      mp3.playMp3FolderTrack(991);
-      if (askCode(pin)) {
-        memcpy(mySettings.adminMenuPin, pin, 4);
-        mySettings.adminMenuLocked = 2;
-      }
-    }
-    else if (temp == 4) {
-      mySettings.adminMenuLocked = 3;
-    }
+
 
   }
   //Wiedergabe stoppen wenn Karte entfernt wird
@@ -542,32 +496,19 @@ void adminMenu(bool fromCard = false)
     int temp = voiceMenu(2, 937, 937, false);
     if (temp == 2) {
       mySettings.stopWhenCardAway = true;
+      #ifdef DEBUG
       Serial.println(F("StopWhenCardAway --> yes"));
+      #endif
     }
     else {
       mySettings.stopWhenCardAway = false;
+      #ifdef DEBUG
       Serial.println(F("StopWhenCardAway --> no"));
+      #endif
     }
   }
   writeSettingsToFlash();
   setstandbyTimer();
-}
-
-bool askCode(uint8_t *code) 
-{
-  uint8_t x = 0;
-  while (x < 4) {
-    readButtons();
-    if (pauseButton.pressedFor(LONG_PRESS))
-      break;
-    if (pauseButton.wasReleased())
-      code[x++] = 1;
-    if (upButton.wasReleased())
-      code[x++] = 2;
-    if (downButton.wasReleased())
-      code[x++] = 3;
-  }
-  return true;
 }
 
 uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
@@ -576,9 +517,11 @@ uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
   uint8_t returnValue = defaultValue;
   if (startMessage != 0)
     mp3.playMp3FolderTrack(startMessage);
+    #ifdef DEBUG
   Serial.print(F("=== voiceMenu() ("));
   Serial.print(numberOfOptions);
   Serial.println(F(" Options)"));
+  #endif
   do {
     if (Serial.available() > 0) {
       int optionSerial = Serial.parseInt();

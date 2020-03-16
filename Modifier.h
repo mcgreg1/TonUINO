@@ -1,3 +1,5 @@
+//TODO: Modifier not as class but as hex code, enum
+
 #ifndef Modifier_h
 #define Modifier_h
 
@@ -12,6 +14,7 @@ struct folderSettings
   uint8_t mode;
   uint8_t special;
   uint8_t special2;
+  uint16_t lastPos;
 };
 
 // this object stores nfc tag data
@@ -71,7 +74,7 @@ class Locked: public Modifier {
     uint8_t getActive(); 
 
 };
-
+/*
 class ToddlerMode: public Modifier {
   public:
     virtual bool handlePause(); 
@@ -83,7 +86,8 @@ class ToddlerMode: public Modifier {
     ToddlerMode();
     uint8_t getActive(); 
 };
-
+*/
+/*
 class KindergardenMode: public Modifier {
   private:
     nfcTagObject nextCard;
@@ -105,17 +109,6 @@ class RepeatSingleModifier: public Modifier {
     uint8_t getActive();
 };
 
-// An modifier can also do somethings in addition to the modified action
-// by returning false (not handled) at the end
-// This simple FeedbackModifier will tell the volume before changing it and
-// give some feedback once a RFID card is detected.
-class FeedbackModifier: public Modifier {
-  public:
-    virtual bool handleVolumeDown();
-    virtual bool handleVolumeUp();
-    virtual bool handleRFID(nfcTagObject * newCard);
-    uint8_t getActive(); 
-};
 
 
 class FreezeDance: public Modifier {
@@ -131,6 +124,6 @@ class FreezeDance: public Modifier {
     const uint8_t minSecondsBetweenStops = 5;
     const uint8_t maxSecondsBetweenStops = 30;
 };
-
+*/
 
 #endif modifier_h

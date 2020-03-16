@@ -6,15 +6,15 @@
 #include "player.h"
 #include "utilities.h"
 
-#include <DFMiniMp3.h>
+
 #include <EEPROM.h>
 #include <JC_Button.h>
 
 #include <SPI.h>
-#include <SoftwareSerial.h>
+//#include <SoftwareSerial.h>
 #include <avr/sleep.h>
 
-
+//#define DEBUG
 
 
 #define buttonPause A0
@@ -51,8 +51,10 @@ struct adminSettings {
   bool stopWhenCardAway;
 };
 
-extern SoftwareSerial mySoftwareSerial; // RX, TX;
-static DFMiniMp3<SoftwareSerial, Mp3Notify> mp3(mySoftwareSerial);
+static Player mp3;
+
+//extern SoftwareSerial mySoftwareSerial; // RX, TX;
+//static DFMiniMp3<SoftwareSerial, Mp3Notify> mp3(mySoftwareSerial);
 //
 extern adminSettings mySettings;
 

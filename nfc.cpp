@@ -1,13 +1,13 @@
 #include "nfc.h"
 
-MFRC522 mfrc522(SS_PIN, RST_PIN); // Create MFRC522
+MFRC522 mfrc522(10, 9); // Create MFRC522
 uint32_t cardCookie = 322417479;
 MFRC522::MIFARE_Key key;
 
 bool successRead;
 byte sector = 1;
 byte blockAddr = 4;
-byte trailerBlock = 7;
+byte trailerBlock = 5;
 
 
 void initNFC()
@@ -54,8 +54,8 @@ byte pollCard()
             mfrc522.PICC_HaltA();
             mfrc522.PCD_StopCrypto1();
             Serial.print(F("Karte konnte nicht gelesen werden"));
-    }
-    }
+          }
+      }
     }
     return PCS_NO_CHANGE;
   }
@@ -104,7 +104,8 @@ void handleCardReader()
       onNewCard();
       break;
     case PCS_CARD_GONE:
-    if (mySettings.stopWhenCardAway) {
+    if (mySettings.stopWhenCardAway) 
+    {
       mp3.pause();
       setstandbyTimer();
     }
@@ -137,7 +138,7 @@ void onNewCard()
   // make random a little bit more "random"
   randomSeed(millis() + random(1000));
     if (myCard.cookie == cardCookie && myCard.nfcFolderSettings.folder != 0 && myCard.nfcFolderSettings.mode != 0) {
-      playFolder();
+      mp3.playFolder();
   }
 
     // Neue Karte konfigurieren
@@ -164,6 +165,35 @@ void setupCard() {
   }
   delay(1000);
 }
+
+MFRC522::StatusCode authenticate(MFRC522::PICC_Type mifareType)
+{
+
+
+
+  // Authenticate using key B
+  //authentificate with the card and set card specific parameters
+  if ((mifareType == MFRC522::PICC_TYPE_MIFARE_MINI ) ||
+      (mifareType == MFRC522::PICC_TYPE_MIFARE_1K ) ||
+      (mifareType == MFRC522::PICC_TYPE_MIFARE_4K ) )
+  {
+    Serial.println(F("Authenticating again using key A..."));
+    status = mfrc522.PCD_Authenticate(
+               MFRC522::PICC_CMD_MF_AUTH_KEY_A, trailerBlock, &key, &(mfrc522.uid));
+  }
+  else if (mifareType == MFRC522::PICC_TYPE_MIFARE_UL )
+  {
+    byte pACK[] = {0, 0}; //16 bit PassWord ACK returned by the NFCtag
+
+    // Authenticate using key A
+    Serial.println(F("Authenticating UL..."));
+    status = mfrc522.PCD_NTAG216_AUTH(key.keyByte, pACK);
+  }
+  return status;
+  
+}
+
+
 bool readCard(nfcTagObject * nfcTag) {
   nfcTagObject tempCard;
   // Show some details of the PICC (that is: the tag/card)
@@ -177,23 +207,7 @@ bool readCard(nfcTagObject * nfcTag) {
   byte buffer[18];
   byte size = sizeof(buffer);
 
-  // Authenticate using key A
-  if ((piccType == MFRC522::PICC_TYPE_MIFARE_MINI ) ||
-      (piccType == MFRC522::PICC_TYPE_MIFARE_1K ) ||
-      (piccType == MFRC522::PICC_TYPE_MIFARE_4K ) )
-  {
-    Serial.println(F("Authenticating Classic using key A..."));
-    status = mfrc522.PCD_Authenticate(
-               MFRC522::PICC_CMD_MF_AUTH_KEY_A, trailerBlock, &key, &(mfrc522.uid));
-  }
-  else if (piccType == MFRC522::PICC_TYPE_MIFARE_UL )
-  {
-    byte pACK[] = {0, 0}; //16 bit PassWord ACK returned by the tempCard
-
-    // Authenticate using key A
-    Serial.println(F("Authenticating MIFARE UL..."));
-    status = mfrc522.PCD_NTAG216_AUTH(key.keyByte, pACK);
-  }
+  status=authenticate(piccType);
 
   if (status != MFRC522::STATUS_OK) {
     Serial.print(F("PCD_Authenticate() failed: "));
@@ -257,6 +271,7 @@ bool readCard(nfcTagObject * nfcTag) {
       return false;
     }
     memcpy(buffer + 12, buffer2, 4);
+
   }
 
   Serial.print(F("Data on Card "));
@@ -277,6 +292,9 @@ bool readCard(nfcTagObject * nfcTag) {
   tempCard.nfcFolderSettings.mode = buffer[6];
   tempCard.nfcFolderSettings.special = buffer[7];
   tempCard.nfcFolderSettings.special2 = buffer[8];
+  tempCard.nfcFolderSettings.lastPos=(uint16_t)buffer[11] << 8 || (uint16_t)buffer[12]; 
+  Serial.print("Las pos on Card: ");
+  Serial.println(tempCard.nfcFolderSettings.lastPos);
 
   if (tempCard.cookie == cardCookie) {
 
@@ -325,11 +343,11 @@ bool readCard(nfcTagObject * nfcTag) {
         case 255:
           mfrc522.PICC_HaltA(); mfrc522.PCD_StopCrypto1(); adminMenu(true);  break;
         case 1: activeModifier = new SleepTimer(tempCard.nfcFolderSettings.special); break;
-        case 2: activeModifier = new FreezeDance(); break;
+//        case 2: activeModifier = new FreezeDance(); break;
         case 3: activeModifier = new Locked(); break;
-        case 4: activeModifier = new ToddlerMode(); break;
-        case 5: activeModifier = new KindergardenMode(); break;
-        case 6: activeModifier = new RepeatSingleModifier(); break;
+        //case 4: activeModifier = new ToddlerMode(); break;
+//        case 5: activeModifier = new KindergardenMode(); break;
+//        case 6: activeModifier = new RepeatSingleModifier(); break;
       }
       mfrc522.PICC_HaltA();
       mfrc522.PCD_StopCrypto1();
@@ -353,6 +371,7 @@ bool readCard(nfcTagObject * nfcTag) {
 
 void writeCard(nfcTagObject nfcTag) {
   MFRC522::PICC_Type mifareType;
+    mifareType = mfrc522.PICC_GetType(mfrc522.uid.sak);
   byte buffer[16] = {0x13, 0x37, 0xb3, 0x47, // 0x1337 0xb347 magic cookie to
                      // identify our nfc tags
                      0x02,                   // version 1
@@ -360,31 +379,12 @@ void writeCard(nfcTagObject nfcTag) {
                      nfcTag.nfcFolderSettings.mode,    // the playback mode picked by the user
                      nfcTag.nfcFolderSettings.special, // track or function for admin cards
                      nfcTag.nfcFolderSettings.special2,
-                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+                     nfcTag.nfcFolderSettings.lastPos,// 
+                     0x00, 0x00, 0x00, 0x00, 0x00
                     };
 
   byte size = sizeof(buffer);
-
-  mifareType = mfrc522.PICC_GetType(mfrc522.uid.sak);
-
-  // Authenticate using key B
-  //authentificate with the card and set card specific parameters
-  if ((mifareType == MFRC522::PICC_TYPE_MIFARE_MINI ) ||
-      (mifareType == MFRC522::PICC_TYPE_MIFARE_1K ) ||
-      (mifareType == MFRC522::PICC_TYPE_MIFARE_4K ) )
-  {
-    Serial.println(F("Authenticating again using key A..."));
-    status = mfrc522.PCD_Authenticate(
-               MFRC522::PICC_CMD_MF_AUTH_KEY_A, trailerBlock, &key, &(mfrc522.uid));
-  }
-  else if (mifareType == MFRC522::PICC_TYPE_MIFARE_UL )
-  {
-    byte pACK[] = {0, 0}; //16 bit PassWord ACK returned by the NFCtag
-
-    // Authenticate using key A
-    Serial.println(F("Authenticating UL..."));
-    status = mfrc522.PCD_NTAG216_AUTH(key.keyByte, pACK);
-  }
+  status = authenticate(mifareType);
 
   if (status != MFRC522::STATUS_OK) {
     Serial.print(F("PCD_Authenticate() failed: "));
@@ -397,18 +397,18 @@ void writeCard(nfcTagObject nfcTag) {
   Serial.print(F("Writing data into block "));
   Serial.print(blockAddr);
   Serial.println(F(" ..."));
-  dump_byte_array(buffer, 16);
+  dump_byte_array(buffer, size);
   Serial.println();
 
   if ((mifareType == MFRC522::PICC_TYPE_MIFARE_MINI ) ||
       (mifareType == MFRC522::PICC_TYPE_MIFARE_1K ) ||
       (mifareType == MFRC522::PICC_TYPE_MIFARE_4K ) )
   {
-    status = (MFRC522::StatusCode)mfrc522.MIFARE_Write(blockAddr, buffer, 16);
+    status = (MFRC522::StatusCode)mfrc522.MIFARE_Write(blockAddr, buffer, size);
   }
   else if (mifareType == MFRC522::PICC_TYPE_MIFARE_UL )
   {
-    byte buffer2[16];
+    byte buffer2[size];
     byte size2 = sizeof(buffer2);
 
     memset(buffer2, 0, size2);
@@ -426,6 +426,7 @@ void writeCard(nfcTagObject nfcTag) {
     memset(buffer2, 0, size2);
     memcpy(buffer2, buffer + 12, 4);
     status = (MFRC522::StatusCode)mfrc522.MIFARE_Write(11, buffer2, 16);
+
   }
 
   if (status != MFRC522::STATUS_OK) {
@@ -437,6 +438,45 @@ void writeCard(nfcTagObject nfcTag) {
     mp3.playMp3FolderTrack(400);
   Serial.println();
   delay(2000);
+}
+
+void updatePosition(uint16_t lastPos) {
+  MFRC522::PICC_Type mifareType;
+  mifareType = mfrc522.PICC_GetType(mfrc522.uid.sak);
+  status = authenticate(mifareType);
+  byte buffer[4];
+  buffer[0]=(byte)(myFolder->special2);
+  buffer[1]=(byte)(lastPos);
+  buffer[2]=(byte)(lastPos<<8);
+  buffer[3]=(byte)(0x0);
+  
+  if (status != MFRC522::STATUS_OK) 
+  {
+    Serial.print(F("PCD_Authenticate() failed, playback position not updated!"));
+    Serial.println(mfrc522.GetStatusCodeName(status));
+
+    return;
+  }
+
+  if ((mifareType == MFRC522::PICC_TYPE_MIFARE_MINI ) ||
+      (mifareType == MFRC522::PICC_TYPE_MIFARE_1K ) ||
+      (mifareType == MFRC522::PICC_TYPE_MIFARE_4K ) )
+  {
+    status = (MFRC522::StatusCode)mfrc522.MIFARE_Write(blockAddr+2, buffer, 4);
+  }
+  else if (mifareType == MFRC522::PICC_TYPE_MIFARE_UL )
+  {
+    status = (MFRC522::StatusCode)mfrc522.MIFARE_Write(10, buffer, 4);
+  }
+
+  if (status != MFRC522::STATUS_OK) {
+    Serial.print(F("MIFARE_Write() failed: "));
+    Serial.println(mfrc522.GetStatusCodeName(status));
+
+  }
+  else
+    Serial.print(F("Last Position updated to: "));
+    Serial.println(lastPos);
 }
 
 void resetCard() 

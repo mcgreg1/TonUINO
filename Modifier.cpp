@@ -114,7 +114,7 @@ uint8_t Locked::getActive()
   return 3;
 }
 
-
+/*
 ToddlerMode::ToddlerMode() 
 {
   Serial.println(F("=== ToddlerMode()"));
@@ -158,7 +158,8 @@ uint8_t ToddlerMode::getActive()
   return 4;
 }
 
-
+*/
+/*
 KindergardenMode::KindergardenMode() 
 {
   Serial.println(F("=== KindergardenMode()"));
@@ -180,7 +181,7 @@ bool KindergardenMode::handleNext()
     myFolder = &myCard.nfcFolderSettings;
     Serial.println(myFolder->folder);
     Serial.println(myFolder->mode);
-    playFolder();
+    mp3.playFolder();
     return true;
   }
   return false;
@@ -238,44 +239,6 @@ uint8_t RepeatSingleModifier::getActive()
 }
 
 
-// An modifier can also do somethings in addition to the modified action
-// by returning false (not handled) at the end
-// This simple FeedbackModifier will tell the volume before changing it and
-// give some feedback once a RFID card is detected.
-//FeedbackModifier::FeedbackModifier(){};
-
-bool FeedbackModifier::handleVolumeDown() 
-{
-  if (volume > mySettings.minVolume) {
-    mp3.playAdvertisement(volume - 1);
-  }
-  else {
-    mp3.playAdvertisement(volume);
-  }
-  delay(500);
-  Serial.println(F("== FeedbackModifier::handleVolumeDown()!"));
-  return false;
-}
-bool FeedbackModifier::handleVolumeUp() 
-{
-  if (volume < mySettings.maxVolume) {
-    mp3.playAdvertisement(volume + 1);
-  }
-  else {
-    mp3.playAdvertisement(volume);
-  }
-  delay(500);
-  Serial.println(F("== FeedbackModifier::handleVolumeUp()!"));
-  return false;
-}
-bool FeedbackModifier::handleRFID(nfcTagObject *newCard) 
-{
-  Serial.println(F("== FeedbackModifier::handleRFID()"));
-  return false;
-}
-
-
-
 FreezeDance::FreezeDance() 
 {
   Serial.println(F("=== FreezeDance()"));
@@ -312,3 +275,4 @@ uint8_t FreezeDance::getActive()
   Serial.println(F("== FreezeDance::getActive()"));
   return 2;
 }
+*/
